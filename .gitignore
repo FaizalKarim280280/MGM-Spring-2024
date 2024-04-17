@@ -164,3 +164,8 @@ tree_graph
 tree_graph.png
 MNIST
 temp
+
+.vscode
+*.pth
+*.pt
+*.out
