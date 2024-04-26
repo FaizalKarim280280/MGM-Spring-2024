@@ -32,7 +32,7 @@ class FlowersDataset(Dataset):
     def __getitem__(self, idx):
         
         img = plt.imread(self.df.iloc[idx, 0])[:, :, :3]        
-        img = cv2.resize(img, (128, 128))
+        img = cv2.resize(img, (64, 64))
         if self.transforms is not None:
             img = self.transforms(img)
         

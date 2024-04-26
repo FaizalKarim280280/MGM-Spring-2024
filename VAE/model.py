@@ -13,10 +13,9 @@ class Encoder(nn.Module):
         super().__init__()
         self.in_channels = in_channels
         self.latent_dim = latent_dim
-        
-        self.conv1 = self.create_conv_blocks(self.in_channels, 16, kernel_size=3, padding=1, stride=2)
+        self.conv1 = self.create_conv_blocks(16, 16, kernel_size=3, padding=1, stride=2)
         self.conv2 = self.create_conv_blocks(16, 64, kernel_size=3, padding=1, stride=2)
-        self.conv3 = self.create_conv_blocks(64, 128, kernel_size=3, padding=1, stride=4)
+        self.conv3 = self.create_conv_blocks(64, 128, kernel_size=3, padding=1, stride=2)
         self.conv4 = self.create_conv_blocks(128, 256, kernel_size=3, padding=1, stride=2)
         self.conv5 = self.create_conv_blocks(256, 512, kernel_size=3, padding=1, stride=2)
         
@@ -24,6 +23,8 @@ class Encoder(nn.Module):
         
         self.fc1 = self.create_fc_blocks(128, self.latent_dim, mean=True)
         self.fc2 = self.create_fc_blocks(128, self.latent_dim, mean=False)
+        
+        self.conv0 = self.create_conv_blocks(self.in_channels, 16, kernel_size=5, padding=2, stride=1)
         
         print("Encoder created")
         
@@ -56,10 +57,11 @@ class Encoder(nn.Module):
         )
         
     def forward(self, x):
-        # 3, 128, 128
-        x = self.conv1(x) # 16, 64, 64
-        x = self.conv2(x) # 64, 32, 32
-        x = self.conv3(x) # 128, 16, 16
+        # 3, 64, 64
+        x = self.conv0(x) # 16, 64, 64
+        x = self.conv1(x) # 16, 32, 32
+        x = self.conv2(x) # 64, 16, 16
+        x = self.conv3(x) # 128, 8, 8
         x = self.conv4(x) # 256, 4, 4
         x = self.conv5(x) # 512, 2, 2
         x = nn.AvgPool2d(2)(x) # 512, 1, 1
@@ -93,7 +95,9 @@ class Decoder(nn.Module):
         self.conv4 = self.create_conv_blocks(32, 16, kernel_size=4, padding=1, stride=2)
         self.conv5 = self.create_conv_blocks(16, self.out_channels, kernel_size=4, padding=1, stride=2, last=False)
         self.conv6 = nn.Sequential(
-            nn.Conv2d(self.out_channels, self.out_channels, kernel_size=3, padding=1, stride=1),
+            nn.Conv2d(16, self.out_channels, kernel_size=1, padding=0, stride=1),
+            nn.LeakyReLU(0.1),
+            nn.Conv2d(self.out_channels, self.out_channels, kernel_size=1, padding=0, stride=1),
             nn.Sigmoid()
         )
         
@@ -112,7 +116,7 @@ class Decoder(nn.Module):
             nn.Conv2d(1, int(out_c/2), kernel_size=3, padding=1, stride=1),
             nn.LeakyReLU(0.1),
             nn.Conv2d(int(out_c/2), out_c, kernel_size=3, padding=1, stride=1),
-            nn.Tanh(),
+            # nn.Tanh(),
             
         )
     
@@ -132,7 +136,7 @@ class Decoder(nn.Module):
             nn.BatchNorm2d(out_c),
             nn.LeakyReLU(0.1),
             
-            nn.Conv2d(out_c, out_c, kernel_size=3, padding=1, stride=1),
+            nn.Conv2d(out_c, out_c, kernel_size=5, padding=2, stride=1),
             nn.LeakyReLU() if not last else nn.Identity(),
             nn.Dropout(0.1) if not last else nn.Identity()
         )
@@ -147,18 +151,18 @@ class Decoder(nn.Module):
         x = self.conv1(x) # 128, 8, 8 
         z1 = self.att1(self.fc_att1(z).view(-1, 1, 8, 8))
         # z1 = self.sigmoid(z1)
-        x = x * z1
+        x = x + z1
         
         x = self.conv2(x) # 64, 16, 16
         z2 = self.att2(self.fc_att2(z).view(-1, 1, 16, 16))
         # z2 = self.sigmoid(z2)
         # ic(x.shape, z2.shape)
-        x = x * z2
+        x = x + z2
         
         
         x = self.conv3(x) # 32, 32, 32
         x = self.conv4(x) # 16, 64, 64
-        x = self.conv5(x) # 3, 128, 128
+        # x = self.conv5(x) # 3, 128, 128
         
         x = self.conv6(x)
         return x

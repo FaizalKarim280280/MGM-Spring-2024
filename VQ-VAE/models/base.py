@@ -47,7 +47,7 @@ class Encoder(nn.Module):
         x = self.conv1(x) # 16, 32, 32
         x = self.conv2(x) # 64, 16, 16
         x = self.conv3(x) # 128, 8, 8
-        x = self.conv4(x) # 128, 8, 8
+        x = self.conv4(x) # e, 8, 8
         return x
     
     
@@ -109,14 +109,15 @@ class Decoder(nn.Module):
             nn.Conv2d(1, out_c//2, kernel_size=3, padding=1, stride=1, bias=False),
             nn.BatchNorm2d(out_c//2),
             nn.LeakyReLU(0.1),
-            nn.Conv2d(out_c//2, out_c, kernel_size=3, padding=1, stride=1),
+            nn.Conv2d(out_c//2, out_c, kernel_size=3, padding=1, stride=1, bias=False),
+            nn.BatchNorm2d(out_c),
             nn.LeakyReLU(0.1)
         )
     
     def create_fc_blocks(self, in_dim, out_dim):
         return nn.Sequential(
             nn.Linear(in_dim, out_dim),
-            nn.LeakyReLU(0.1)
+            nn.Tanh()
         )
         
     def create_conv_blocks(self, in_c, out_c, kernel_size, padding, stride, last=False):
@@ -131,7 +132,7 @@ class Decoder(nn.Module):
             
             nn.Conv2d(out_c, out_c, kernel_size=5, padding=2, stride=1),
             nn.BatchNorm2d(out_c),
-            nn.LeakyReLU(),
+            nn.LeakyReLU(0.1),
             nn.Dropout(0.1)
         )
         
@@ -141,17 +142,17 @@ class Decoder(nn.Module):
         z = self.conv_z(z).view(-1, 64) # z: -1, 64
         
         z1 = self.att1(self.fc_att1(z).view(-1, 1, 8, 8))
-        x = x + z1 # 256, 8, 8
-        x_r1 = self.conv_1x1_1(nn.Upsample(size=(32, 32), mode='nearest')(x)) # 32, 32, 32
+        # x = x + z1 # 256, 8, 8
+        # x_r1 = self.conv_1x1_1(nn.Upsample(size=(32, 32), mode='nearest')(x)) # 32, 32, 32
          
         x = self.conv2(x) # 128, 16, 16
         
         z2 = self.att2(self.fc_att2(z).view(-1, 1, 16, 16))
-        x = x + z2 # 128, 16, 16
-        x_r2 = self.conv_1x1_2(nn.Upsample(size=(64, 64), mode='nearest')(x)) # 16, 64, 64
+        # x = x + z2 # 128, 16, 16
+        # x_r2 = self.conv_1x1_2(nn.Upsample(size=(64, 64), mode='nearest')(x)) # 16, 64, 64
         
-        x = self.conv3(x) + 0 * x_r1 # 64, 32, 32
-        x = self.conv4(x) + 0 * x_r2 # 16, 64, 64
+        x = self.conv3(x)  # 64, 32, 32
+        x = self.conv4(x)  # 16, 64, 64
         
         x = self.conv6(x) # 3, 64, 64
         return x

@@ -28,6 +28,7 @@ class Trainer:
     def get_loss(self, y_pred, x, mean, logvar):
         # recon_loss = nn.functional.binary_cross_entropy(y_pred, x, reduction='sum')
         recon_loss = nn.functional.mse_loss(y_pred, x, reduction='sum')
+        # recon_loss = nn.functional.l1_loss(y_pred, x, reduction='sum')
         kl_div = -0.5 * torch.sum(1 + logvar - mean.pow(2) - logvar.exp())
         
         # recon_loss = nn.functional.mse_loss(y_pred, x)
@@ -75,7 +76,7 @@ class Trainer:
         grid_image_out = vutils.make_grid(out, nrow=5, padding=2, normalize=False).permute(1, 2, 0)
         plt.imshow(grid_image_out.cpu().numpy())
         plt.axis('off')
-        plt.savefig(f'./temp/outputs/flowers/{epoch}.png')
+        plt.savefig(f'./temp/outputs/anime/{epoch}.png')
         
         # plt.show()
         
@@ -91,5 +92,5 @@ class Trainer:
             
             print(f"[Epoch: {epoch}] Train:[loss:{train_loss:.5f}] Val:[loss:{val_loss:.5f}]")    
 
-            # torch.save(self.model.state_dict(), f'/scratch/fk/checkpoints/vae_shapes_{epoch}.pth')
+            torch.save(self.model.state_dict(), f'/scratch/fk/checkpoints/vae_shapes_{epoch}.pth')
         

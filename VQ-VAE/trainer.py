@@ -51,8 +51,7 @@ class Trainer:
             out = self.model(x)
             x_hat, z, z_q = out.values()
             recon_loss, quantization_loss, commitment_loss = self.get_loss(x, x_hat, z, z_q)
-            # loss = recon_loss + quantization_loss + self.commitment_cost * commitment_loss
-            
+                        
             return recon_loss, quantization_loss, commitment_loss
         
     def go_one_epoch(self, loader, step_fxn):

@@ -10,20 +10,23 @@ class Decoder(nn.Module):
         self.convs = nn.ModuleList(self.convs)
         
         self.fc = nn.Sequential(
-            nn.Linear(256, self.num_layers * 3 * 3),
+            nn.Linear(512, self.num_layers * 3 * 3 * 2),
             nn.LeakyReLU(0.1),
-            nn.Linear(self.num_layers * 3 * 3, self.num_layers * 3 * 3),
+            nn.Linear(self.num_layers * 3 * 3 * 2, self.num_layers * 3 * 3),
         )
-        self.drop = nn.Dropout(0.2)
+        self.drop = nn.Dropout(0.1)
             
     def create_conv_layer(self, in_c, out_c, kernel_size=3):
         return nn.Sequential(
+            nn.ConvTranspose2d(in_c, in_c, kernel_size=kernel_size, stride=1, bias=False),
+            nn.BatchNorm2d(in_c),
+            nn.LeakyReLU(0.1),
             nn.ConvTranspose2d(in_c, out_c, kernel_size=kernel_size, stride=1, bias=False),
             nn.BatchNorm2d(out_c),
             nn.LeakyReLU(0.1),
             nn.ConvTranspose2d(out_c, out_c, kernel_size=kernel_size, stride=1, bias=False),
             nn.BatchNorm2d(out_c),
-            nn.LeakyReLU(0.1)
+            nn.LeakyReLU(0.1),
         )
         
     def forward(self, x):
@@ -49,14 +52,17 @@ class Encoder(nn.Module):
         
         self.convs = nn.ModuleList(self.convs)
         self.fc = nn.Sequential(
-            nn.Linear(self.num_layers * 3 * 3, self.num_layers * 3 * 3),
+            nn.Linear(self.num_layers * 3 * 3, self.num_layers * 3 * 3 * 2),
             nn.LeakyReLU(0.1),
-            nn.Linear(self.num_layers * 3 * 3, 256)
+            nn.Linear(self.num_layers * 3 * 3 * 2, 512)
         )
-        self.drop = nn.Dropout(0.2)
+        self.drop = nn.Dropout(0.1)
             
     def create_conv_layer(self, in_c, out_c, kernel_size=3):
         return nn.Sequential(
+            nn.Conv2d(in_c, in_c, kernel_size=kernel_size, stride=1, bias=False),
+            nn.BatchNorm2d(in_c),
+            nn.LeakyReLU(0.1),
             nn.Conv2d(in_c, out_c, kernel_size=kernel_size, stride=1, bias=False),
             nn.BatchNorm2d(out_c),
             nn.LeakyReLU(0.1),
@@ -74,10 +80,7 @@ class Encoder(nn.Module):
             xs.append(self.convs[i](x[:, i, :]))
             
         xs = torch.stack(xs, dim=1)
-        # print(xs.shape)
         xs = xs.view(bs, self.num_layers * 3 * 3) # bs, num_layers * 3 * 3
-        # xs = self.drop(xs)
-        # print(xs.shape)
         xs = self.fc(xs) # bs, 256
         return xs
     

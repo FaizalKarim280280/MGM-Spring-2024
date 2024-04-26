@@ -21,9 +21,9 @@ def get_data_to_df(path):
     for folder in os.listdir(path):
         for img in os.listdir(os.path.join(path, folder)):
             img_path = os.path.join(path, folder, img)
-            # img = plt.imread(img_path)
-            # if len(img.shape) != 3:
-            #     print(img_path, end = ' ')
+            img = plt.imread(img_path)
+            if len(img.shape) != 3:
+                print(img_path, end = ' ')
             df['filename'].append(img_path)
             df['label'].append(folder)
             
@@ -43,7 +43,7 @@ def get_number_of_params(model):
 def main():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     data_root = '/scratch/fk/flowers'
-    batch_size = 128
+    batch_size = 32
         
     df_train, df_val = get_data_to_df(data_root)
     
@@ -57,7 +57,7 @@ def main():
     # print(a.shape)   
     # plt.imsave('./temp/1.png', a[0].cpu().permute(1, 2, 0).numpy())
     
-    model = VQVAE(embedding_dim=256, num_embeddings=512, device=device)
+    model = VQVAE(embedding_dim=128, num_embeddings=256, device=device)
     
     print("Number of parameters in model:", get_number_of_params(model))
     

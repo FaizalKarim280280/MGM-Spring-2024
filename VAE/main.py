@@ -43,9 +43,9 @@ def get_number_of_params(model):
             
 def main():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    data_root = '/scratch/fk/cropped'
+    data_root = '/scratch/fk/anime-faces'
     batch_size = 32
-    
+        
     df_train, df_val = get_data_to_df(data_root)
     
     train_dataset = FlowersDataset(df=df_train, type='train')
