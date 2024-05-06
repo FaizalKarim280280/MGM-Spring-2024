@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from .base import Encoder, Decoder
+from .base2 import Encoder, Decoder
 from icecream import ic
 
 class VQVAE(nn.Module):
@@ -33,19 +33,12 @@ class VQVAE(nn.Module):
         
         
     def vector_quantization(self, z):
-        z_org_shape = z.shape
-        # Flatten z to (batch_size, channel_size, num_pixels)
-        z = z.permute(0, 2, 3, 1)  # (batch_size, height, width, channel)
-        flatten_z = z.contiguous().view(-1, self.embedding_dim)
+        b, c, h, w = z.shape 
         
-        # Calculate distances between each encoded vector and embeddings
-        distances = torch.sum(flatten_z**2, dim=1, keepdim=True) + \
-                    torch.sum(self.embedding.weight**2, dim=1) - \
-                    2 * torch.matmul(flatten_z, self.embedding.weight.t())
-        
-        # Find nearest embeddings (vector quantization)
-        _, indices = torch.min(distances, dim=1)
-        z_q = self.embedding(indices).view(z_org_shape)
+        z = z.view(b, -1, self.embedding_dim).unsqueeze(2)
+        dist = torch.sum((z - self.embedding.weight[None, None, :, :]) ** 2, dim = -1) ** 0.5
+        indices = torch.argmin(dist, dim = -1)
+        z_q = self.embedding(indices).permute(0, 2, 1).view(-1, self.embedding_dim, h, w)
         
         return z_q, indices
     

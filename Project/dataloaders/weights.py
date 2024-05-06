@@ -12,7 +12,7 @@ class WeightDataset:
         self.df = df
         self.n_samples = len(self.df)
         self.add_noise = add_noise
-        self.noise_scaling = 0.025
+        self.noise_scaling = 0.005
         
     def __len__(self):
         return self.n_samples
