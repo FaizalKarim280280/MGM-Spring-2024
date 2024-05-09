@@ -8,7 +8,8 @@ This project is on generating the parameters of a CNN model using Diffusion Mode
 Hence, the aim of this project was to generate parameters for a mid-sized CNN network using Diffusion. We took a sequential approach in generating the parameters, that is, generating parameters layer by layer.
 
 ## Important
-`run_notebook.ipynb` contains inference code. Training code is not given because sharing the dataset is difficult as of now (still finding some place online to store it). 
+1. `run_notebook.ipynb` contains inference code. Training code is not given because sharing the dataset is difficult as of now (still finding some place online to store it).
+2. The `denoing_diffusion_pytorch` is an external package that was used for experiments. Apart from that, all other code is written by me.
 
 ## Install libraries
 
@@ -28,6 +29,16 @@ Folders:
 1. Training the Autoencoder: `python3 main_ae.py`
 2. Training the diffusion model: `python3 main_diffusion.py`
 3. Dataset creation: `python3 main.py` (Need to change the exp folder name)
+
+## Model architecture overview
+<img src='https://github.com/FaizalKarim280280/MGM-Spring-2024/blob/main/Project/images/arch1.png' width="50%"/>
+
+#### 1. Encoder-Decoder
+<img src="https://github.com/FaizalKarim280280/MGM-Spring-2024/blob/main/Project/images/enc-dec.png" width="70%"/>
+
+#### 2. 1D Diffusion
+<img src="https://github.com/FaizalKarim280280/MGM-Spring-2024/blob/main/Project/images/1d_diff.png" width="70%"/>
+
 
 ## Some visualizations
 <img src="https://github.com/FaizalKarim280280/MGM-Spring-2024/blob/main/Project/images/mgm-viz1.png"/>
