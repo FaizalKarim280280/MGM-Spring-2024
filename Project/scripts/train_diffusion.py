@@ -29,10 +29,10 @@ def run(args):
     from sklearn.model_selection import train_test_split
     
     df_train, df_val = train_test_split(df, test_size=0.2)
-    train_dataset =  WeightDataset(df_train, add_noise=True)
+    train_dataset =  WeightDataset(df_train, add_noise=False)
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=7)
     
-    val_dataset = WeightDataset(df_val, add_noise=True)
+    val_dataset = WeightDataset(df_val, add_noise=False)
     val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, num_workers=7)
     print("DataLoaders created")
     

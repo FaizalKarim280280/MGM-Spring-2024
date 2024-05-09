@@ -30,9 +30,9 @@ class DiffusionTrainer:
         
         self.model = DiffusionNet().to(self.device)
         self.diffusion = Diffusion(
-            noise_steps=200,
-            beta_start=1e-5,
-            beta_end=1e-3,
+            noise_steps=50,
+            beta_start=1e-7,
+            beta_end=1e-5,
             device=self.device
         )
         
@@ -61,7 +61,7 @@ class DiffusionTrainer:
                 
         ic("Autoencoders loaded")
                 
-        self.alpha = 0.3
+        self.alpha = 0.8
         print("Parameters in model: ", self.get_num_parameters(self.model))
         
         # for name, param in self.model.named_parameters():
@@ -115,7 +115,7 @@ class DiffusionTrainer:
             
             for idx, x in enumerate(data.values()):
                 x = x.to(self.device)
-                layer = torch.tensor([(idx+1) * 10] * x.size(0), device=self.device).long()
+                layer = torch.tensor([(idx+1) * 30] * x.size(0), device=self.device).long()
                 with torch.no_grad():
                     code = self.autoencoder[idx].encoder(x)
                     

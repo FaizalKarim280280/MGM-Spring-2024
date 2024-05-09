@@ -3,14 +3,40 @@ import torch.nn as nn
 from icecream import ic
 import numpy as np
 
+class ResMLP(nn.Module):
+    def __init__(self, in_dim, out_dim, hidden_dim, last=False):
+        super().__init__()
+        self.in_dim = in_dim
+        self.out_dim = out_dim
+        self.hidden_dim = hidden_dim
+        self.last = False
+        
+        self.fc1 = nn.Linear(in_dim, hidden_dim, bias=False)
+        self.fc2 = nn.Linear(hidden_dim, hidden_dim, bias=False)
+        self.fc3 = nn.Linear(hidden_dim, out_dim)
+        self.bn1 = nn.BatchNorm1d(hidden_dim)
+        self.bn2 = nn.BatchNorm1d(hidden_dim)
+        self.elu = nn.ELU()
+        
+    def forward(self, x):
+        skip = self.elu(self.bn1(self.fc1(x)))
+        x = self.elu(self.bn2(self.fc2(skip.clone())))
+        x = self.fc3(x + skip)
+        return x if self.last else self.elu(x)
+
 class DiffusionNet(nn.Module):
     def __init__(self):
         super().__init__()
-        self.fc1 = self.create_fc_layers(512, 256)
-        self.fc2 = self.create_fc_layers(256, 256)
-        self.fc3 = self.create_fc_layers(256, 256)
-        self.fc4 = self.create_fc_layers(256, 256)
-        self.fc5 = self.create_fc_layers(256, 512, last=True)
+        # self.fc1 = self.create_fc_layers(512, 256)
+        # self.fc2 = self.create_fc_layers(256, 256)
+        # self.fc3 = self.create_fc_layers(256, 256)
+        # self.fc4 = self.create_fc_layers(256, 256)
+        # self.fc5 = self.create_fc_layers(256, 512, last=True)
+        self.fc1 = ResMLP(512, 256, 384)
+        self.fc2 = ResMLP(256, 256, 128)
+        self.fc3 = ResMLP(256, 256, 128)
+        self.fc4 = ResMLP(256, 256, 128)
+        self.fc5 = ResMLP(256, 512, 384, last=True)
         
         self.time_fc = self.create_fc_layers(128, 128)
         self.layer_fc = self.create_fc_layers(128, 128)
@@ -54,7 +80,7 @@ class DiffusionNet(nn.Module):
         # ic(self.positional_encodings(time, embedding_dim=128).device)
         time_emb = self.time_fc(self.positional_encodings(time, embedding_dim=128)) # bs, 128
         layer_emb = self.layer_fc(self.positional_encodings(layer, embedding_dim=128)) # bs, 128
-        emb = torch.cat([time_emb, layer_emb], dim=-1) # 256
+        emb = torch.cat([time_emb, layer_emb], dim=-1)/10 # 256
         
         x = self.fc1(x) # bs, 512
         x = self.fc2(x + emb) # bs, 256
@@ -115,9 +141,9 @@ class Diffusion:
 def main():
     device = 'cuda'
     diffusion = Diffusion(
-        noise_steps=100,
-        beta_start=1e-5,
-        beta_end=1e-3,
+        noise_steps=200,
+        beta_start=1e-8,
+        beta_end=1e-5,
         device=device
     )
     

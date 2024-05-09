@@ -8,10 +8,13 @@ def main():
     
     args = parser.parse_args()
     args.exp_name = "D2"
+    args.run_index = 0
     
-    for i in range(1000):
-        args.run_index = i
-        train_mnist.run(args)
+    train_mnist.run(args)
+    
+    # for i in range(1000):
+    #     args.run_index = i
+    #     train_mnist.run(args)
 
 if __name__ == "__main__":
     main()

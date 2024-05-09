@@ -12,7 +12,8 @@ class TrainerBaseCNN:
                  lr=1e-4,
                  run_index=None,
                  exp_name=None,
-                 save_checkpoints=True):
+                 save_checkpoints=True,
+                 epochs=10):
         
         self.device = device
         self.model = model.to(self.device)
@@ -21,13 +22,13 @@ class TrainerBaseCNN:
         self.lr = lr
         
         self.loss_fxn = nn.CrossEntropyLoss()
-        # self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr)
         self.optimizer = torch.optim.Adam([
-            {'params': self.model.conv1.parameters(), 'lr': 1e-6},
-            {'params': self.model.conv2.parameters(), 'lr': 1e-6},
-            {'params': self.model.conv3.parameters(), 'lr': 1e-6},
-            {'params': self.model.conv4.parameters(), 'lr': 1e-6},
-            {'params': self.model.fc.parameters(), 'lr': 1e-3},            
+            {'params': self.model.conv1.parameters(), 'lr': 1e-8},
+            {'params': self.model.conv2.parameters(), 'lr': 1e-8},
+            {'params': self.model.conv3.parameters(), 'lr': 1e-8},
+            {'params': self.model.conv4.parameters(), 'lr': 1e-8},
+            {'params': self.model.fc.parameters(), 'lr': 1e-4},            
         ])
         
         self.accuracy_fxn = None
@@ -35,6 +36,7 @@ class TrainerBaseCNN:
         self.exp_name = exp_name
         self.save_dir = f'/scratch/fk/checkpoints'
         self.save_checkpoints = save_checkpoints
+        self.epochs = epochs
         
         os.makedirs(self.save_dir, exist_ok=True)
         
@@ -70,15 +72,15 @@ class TrainerBaseCNN:
             }
         }
         
-    def train(self, epochs=20):
-        for epoch in range(epochs):
+    def train(self):
+        for epoch in range(self.epochs):
             train_outputs = self.go_one_epoch(self.train_loader, self.training_step)
             val_outputs = self.go_one_epoch(self.val_loader, self.val_step)
             
             print(f"[Epoch:{epoch}] [Train:{train_outputs}] [Val:{val_outputs}]")
             
             if self.save_checkpoints:    
-                if val_outputs['metrics']['acc'] > 0.95:
+                if 0.65 >= val_outputs['metrics']['acc'] >= 0.6:
                     filename = os.path.join(f"{self.save_dir}", f"{self.exp_name}_{self.run_index}_{epoch}.pt")
                     torch.save(self.model.state_dict(), filename)
                     print("Checkpoint saved:", filename)
