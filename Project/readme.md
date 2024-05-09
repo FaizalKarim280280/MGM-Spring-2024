@@ -3,7 +3,7 @@
 # NN Parameter Generation using Diffusion Models
 
 ## Introduction
-This project is on generating the parameters of a CNN model using Diffusion Models. Neural Network Diffusion by Wang, Kai et al. only focuses on small networks and generates only a subset of the total parameters. H Neural Network Diffusion directly encodes the whole weight matrix and attempts to generate the parameters in one go. This approach is indeed not scalable. 
+This project is on generating the parameters of a CNN model using Diffusion Models. Neural Network Diffusion by Wang, Kai et al. only focuses on small networks and generates only a subset of the total parameters. It directly encodes the whole weight matrix and attempts to generate the parameters in one go. This approach is indeed not scalable. 
 
 Hence, the aim of this project was to generate parameters for a mid-sized CNN network using Diffusion. We took a sequential approach in generating the parameters, that is, generating parameters layer by layer.
 
