@@ -28,3 +28,8 @@ Folders:
 1. Training the Autoencoder: `python3 main_ae.py`
 2. Training the diffusion model: `python3 main_diffusion.py`
 3. Dataset creation: `python3 main.py` (Need to change the exp folder name)
+
+## Some visualizations
+<img src="https://github.com/FaizalKarim280280/MGM-Spring-2024/blob/main/Project/images/mgm-viz1.png"/>
+<img src="https://github.com/FaizalKarim280280/MGM-Spring-2024/blob/main/Project/images/mgm-viz2.png"/>
+
